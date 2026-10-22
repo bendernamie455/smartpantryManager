@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class PantryDatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "smart_pantry.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     private static final String TABLE_PANTRY = "pantry_items";
     private static final String COL_ID = "id";
@@ -24,23 +24,46 @@ public class PantryDatabaseHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String createTable = "CREATE TABLE " + TABLE_PANTRY + " (" +
-                COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COL_NAME + " TEXT NOT NULL, " +
-                COL_QUANTITY + " REAL NOT NULL, " +
-                COL_UNIT + " TEXT NOT NULL, " +
-                COL_EXPIRY + " TEXT)";
-        db.execSQL(createTable);
+        String createPantry = "CREATE TABLE pantry_items (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "name TEXT NOT NULL, " +
+                "quantity REAL NOT NULL, " +
+                "unit TEXT NOT NULL, " +
+                "expiry_date TEXT)";
+
+        String createRecipes = "CREATE TABLE recipes (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "name TEXT NOT NULL, " +
+                "ingredients TEXT NOT NULL, " +
+                "instructions TEXT NOT NULL)";
+
+        db.execSQL(createPantry);
+        db.execSQL(createRecipes);
+
+        seedRecipes(db);
+    }
+
+    private void seedRecipes(SQLiteDatabase db) {
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion,
                           int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PANTRY);
-        onCreate(db);
+        if (oldVersion < 2) {
+            String createRecipes = "CREATE TABLE recipes (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "name TEXT NOT NULL, " +
+                    "ingredients TEXT NOT NULL, " +
+                    "instructions TEXT NOT NULL)";
+
+            db.execSQL(createRecipes);
+            seedRecipes(db);
+        }
     }
+
 
     public long addItem(PantryItem item) {
         SQLiteDatabase db = getWritableDatabase();
@@ -106,4 +129,5 @@ public class PantryDatabaseHelper extends SQLiteOpenHelper {
                 new String[]{String.valueOf(id)}
         );
     }
+
 }
